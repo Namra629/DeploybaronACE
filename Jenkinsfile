@@ -17,7 +17,7 @@ pipeline {
         stage('Deploy Bar to ACE') {
             steps {
                 sh '''#!/bin/bash
-echo "Loading MQ/ACE environment"
+echo "Loading ACE environment"
 . ${ACE_PROFILE}   
 
 # Stop broker if it exists
