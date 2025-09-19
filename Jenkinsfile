@@ -18,7 +18,7 @@ pipeline {
             steps {
                 sh '''#!/bin/bash
 echo "Loading MQ/ACE environment"
-. ${ACE_PROFILE}   # Corrected: use ACE_PROFILE
+. ${ACE_PROFILE}   
 
 # Stop broker if it exists
 if mqsilist | grep -q '2ndnode'; then
