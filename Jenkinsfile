@@ -20,14 +20,21 @@ pipeline {
 echo "Loading MQ/ACE environment"
 . ${ACE_PROFILE}   # Corrected: use ACE_PROFILE
 
-# Check if broker exists before creating
+# Stop broker if it exists
+if mqsilist | grep -q '2ndnode'; then
+    echo "Stopping existing broker 2ndnode"
+    mqsistop 2ndnode
+fi
+
+# Create broker if missing
 if ! mqsilist | grep -q '2ndnode'; then
     echo "Creating broker 2ndnode"
     mqsicreatebroker 2ndnode
-    mqsistart 2ndnode
-else
-    echo "Broker 2ndnode already exists"
 fi
+
+# Start broker
+echo "Starting broker 2ndnode"
+mqsistart 2ndnode
 
 # Check if execution group exists before creating
 if ! mqsilist 2ndnode | grep -q '2ndserver'; then
