@@ -1,5 +1,8 @@
 pipeline {
     agent any
+     environment {
+        ACE_PATH = '/home/Namra/ace-12.0.12.16/server/bin/mqsiprofile'
+        }
     stages {
         stage('Git Checkout') {
             steps {
@@ -12,8 +15,7 @@ pipeline {
             steps {
                      sh '''#!/bin/bash
                 echo "Loading MQ/ACE environment"
-                . /home/Namra/ace-12.0.12.16/server/bin/mqsiprofile
-
+                export PATH=${ACE_PATH}:$PATH
                 # Check if broker exists before creating
                 if ! mqsilist | grep -q '2ndnode'; then
                     echo "Creating broker 2ndnode"
