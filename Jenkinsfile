@@ -12,7 +12,7 @@ pipeline {
             steps {
                 sh """
                 echo "Loading MQ/ACE environment"
-                source /home/Namra/ace-12.0.12.16/server/bin/mqsiprofile
+                . /home/Namra/ace-12.0.12.16/server/bin/mqsiprofile
 
                 # Check if broker exists before creating
                 if ! mqsilist | grep -q '2ndnode'; then
