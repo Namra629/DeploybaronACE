@@ -1,8 +1,10 @@
 pipeline {
     agent any
-     environment {
-        ACE_PATH = '/home/Namra/ace-12.0.12.16/server/bin/mqsiprofile'
-        }
+
+    environment {
+        ACE_PROFILE = '/home/Namra/ace-12.0.12.16/server/bin/mqsiprofile'
+    }
+
     stages {
         stage('Git Checkout') {
             steps {
@@ -11,32 +13,34 @@ pipeline {
                     credentialsId: 'git_cred'
             }
         }
+
         stage('Deploy Bar to ACE') {
             steps {
-                     sh '''#!/bin/bash
-                echo "Loading MQ/ACE environment"
-                . ${ACE_PROFILE}
-                # Check if broker exists before creating
-                if ! mqsilist | grep -q '2ndnode'; then
-                    echo "Creating broker 2ndnode"
-                    mqsicreatebroker 2ndnode
-                    mqsistart 2ndnode
-                else
-                    echo "Broker 2ndnode already exists"
-                fi
+                sh '''#!/bin/bash
+echo "Loading MQ/ACE environment"
+. ${ACE_PROFILE}   # Corrected: use ACE_PROFILE
 
-                # Check if execution group exists before creating
-                if ! mqsilist 2ndnode | grep -q '2ndserver'; then
-                    echo "Creating execution group 2ndserver"
-                    mqsicreateexecutiongroup 2ndnode -e 2ndserver
-                else
-                    echo "Execution group 2ndserver already exists"
-                fi
+# Check if broker exists before creating
+if ! mqsilist | grep -q '2ndnode'; then
+    echo "Creating broker 2ndnode"
+    mqsicreatebroker 2ndnode
+    mqsistart 2ndnode
+else
+    echo "Broker 2ndnode already exists"
+fi
 
-                # Deploy BAR
-                echo "Deploying HelloWorld.bar"
-                mqsideploy 2ndnode -e 2ndserver -a HelloWorld.bar
-                '''
+# Check if execution group exists before creating
+if ! mqsilist 2ndnode | grep -q '2ndserver'; then
+    echo "Creating execution group 2ndserver"
+    mqsicreateexecutiongroup 2ndnode -e 2ndserver
+else
+    echo "Execution group 2ndserver already exists"
+fi
+
+# Deploy BAR
+echo "Deploying HelloWorld.bar"
+mqsideploy 2ndnode -e 2ndserver -a HelloWorld.bar
+'''
             }
         }
     }
