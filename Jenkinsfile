@@ -10,7 +10,7 @@ pipeline {
         }
         stage('Deploy Bar to ACE') {
             steps {
-                sh """
+                sh ''' #!/bin/bash
                 echo "Loading MQ/ACE environment"
                 . /home/Namra/ace-12.0.12.16/server/bin/mqsiprofile
 
@@ -34,7 +34,7 @@ pipeline {
                 # Deploy BAR
                 echo "Deploying HelloWorld.bar"
                 mqsideploy 2ndnode -e 2ndserver -a HelloWorld.bar
-                """
+                '''
             }
         }
     }
