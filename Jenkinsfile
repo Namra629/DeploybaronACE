@@ -15,7 +15,7 @@ pipeline {
             steps {
                      sh '''#!/bin/bash
                 echo "Loading MQ/ACE environment"
-                export PATH=${ACE_PATH}:$PATH
+                . ${ACE_PROFILE}
                 # Check if broker exists before creating
                 if ! mqsilist | grep -q '2ndnode'; then
                     echo "Creating broker 2ndnode"
