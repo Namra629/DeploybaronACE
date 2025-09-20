@@ -25,7 +25,7 @@ pipeline {
                 echo "Loading ACE environment"
                 . ${ACE_PROFILE}
 
-                # Create node if it doesn't exist
+                # Ensure node exists
                 if ! mqsilist | grep -q "${NODE_NAME}"; then
                     echo "Creating integration node ${NODE_NAME}..."
                     mqsicreatebroker ${NODE_NAME}
@@ -33,23 +33,15 @@ pipeline {
                     echo "Node ${NODE_NAME} already exists"
                 fi
 
-                # Create server if it doesn't exist
-                if ! mqsilist ${NODE_NAME} | grep -q "${SERVER_NAME}"; then
-                    echo "Creating integration server ${SERVER_NAME}..."
-                    mqsicreateexecutiongroup ${NODE_NAME} -e ${SERVER_NAME}
-                else
-                    echo "Server ${SERVER_NAME} already exists"
-                fi
-
                 # Start node if not running
-                NODE_STATUS=$(mqsilist | grep "${NODE_NAME}" | awk '{print $2}')
+                NODE_STATUS=$(mqsilist | grep "${NODE_NAME}" | awk '{print $2}' | head -n1)
                 if [ "$NODE_STATUS" != "Running" ]; then
                     echo "Starting integration node ${NODE_NAME}..."
                     mqsistart ${NODE_NAME}
 
-                    # Wait until node is fully running
+                    # Wait until node is running
                     while true; do
-                        NODE_STATUS=$(mqsilist | grep "${NODE_NAME}" | awk '{print $2}')
+                        NODE_STATUS=$(mqsilist | grep "${NODE_NAME}" | awk '{print $2}' | head -n1)
                         if [ "$NODE_STATUS" == "Running" ]; then
                             echo "Node ${NODE_NAME} is now running."
                             break
@@ -62,8 +54,15 @@ pipeline {
                     echo "Node ${NODE_NAME} is already running."
                 fi
 
-                # Optional sleep to ensure server is ready
-                echo "Waiting 5 seconds before deploying BAR..."
+                # Ensure server exists
+                if ! mqsilist ${NODE_NAME} | grep -q "${SERVER_NAME}"; then
+                    echo "Creating integration server ${SERVER_NAME}..."
+                    mqsicreateexecutiongroup ${NODE_NAME} -e ${SERVER_NAME}
+                else
+                    echo "Server ${SERVER_NAME} already exists"
+                fi
+
+                # Optional sleep before deployment
                 sleep 5
 
                 # Deploy BAR
