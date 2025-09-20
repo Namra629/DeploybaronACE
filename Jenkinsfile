@@ -41,18 +41,28 @@ pipeline {
                     echo "Server ${SERVER_NAME} already exists"
                 fi
 
-                # Start node only if not already running
+                # Start node if not running
                 NODE_STATUS=$(mqsilist | grep "${NODE_NAME}" | awk '{print $2}')
                 if [ "$NODE_STATUS" != "Running" ]; then
                     echo "Starting integration node ${NODE_NAME}..."
                     mqsistart ${NODE_NAME}
-                    echo "Waiting for 10 seconds to ensure node is fully started..."
-                    sleep 10
+
+                    # Wait until node is fully running
+                    while true; do
+                        NODE_STATUS=$(mqsilist | grep "${NODE_NAME}" | awk '{print $2}')
+                        if [ "$NODE_STATUS" == "Running" ]; then
+                            echo "Node ${NODE_NAME} is now running."
+                            break
+                        else
+                            echo "Waiting for node to start..."
+                            sleep 5
+                        fi
+                    done
                 else
-                    echo "Node ${NODE_NAME} is already running"
+                    echo "Node ${NODE_NAME} is already running."
                 fi
 
-                # Optional sleep before deployment to ensure server readiness
+                # Optional sleep to ensure server is ready
                 echo "Waiting 5 seconds before deploying BAR..."
                 sleep 5
 
@@ -66,4 +76,3 @@ pipeline {
         }
     }
 }
-
