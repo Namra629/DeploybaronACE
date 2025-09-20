@@ -21,7 +21,7 @@ pipeline {
                 . ${ACE_PROFILE}
 
                 echo "Starting integration node "
-                mqsistart testnode
+                nohup mqsistart testnode > /var/mqsi/components/testnode/stdout 2> /var/mqsi/components/testnode/stderr &
                 
 
                 echo "Deploying bar"
