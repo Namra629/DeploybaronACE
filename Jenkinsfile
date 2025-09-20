@@ -25,7 +25,7 @@ pipeline {
                 . ${ACE_PROFILE}
 
                 echo "Starting integration node ${NODE_NAME}..."
-                mqsistart ${NODE_NAME} -i
+                mqsistart ${NODE_NAME} 
                 sleep 5
 
                 echo "Deploying ${BAR_FILE} to ${NODE_NAME}/${SERVER_NAME}..."
