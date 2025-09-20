@@ -5,6 +5,8 @@ pipeline {
         NODE_NAME   = 'testnode'
         SERVER_NAME = 'helloworld'
         BAR_FILE    = 'HelloWorld.bar'
+        STDOUT_FILE = '/var/mqsi/components/testnode/stdout'
+        STDERR_FILE = '/var/mqsi/components/testnode/stderr'
     }
     stages {
         stage('Git Checkout') {
@@ -15,36 +17,35 @@ pipeline {
             }
         }
 
-        stage('Start Node and Deploy BAR') {
+        stage('Start Node Detached') {
             steps {
                 sh '''#!/bin/bash
                 set -e
 
-                # Force a login shell to load mqsiprofile properly
-                bash -lc '
-                echo "Loading ACE environment"
-                . ${ACE_PROFILE}
+                echo "Starting integration node ${NODE_NAME} in detached mode..."
+                nohup bash -lc ". ${ACE_PROFILE}; mqsistart ${NODE_NAME}" \
+                    > ${STDOUT_FILE} 2> ${STDERR_FILE} & disown
 
-                # Start node detached if not already running
-                if ! mqsilist | grep -q "${NODE_NAME}.*running"; then
-                    echo "Starting node ${NODE_NAME} detached..."
-                    nohup mqsistart ${NODE_NAME} > /var/mqsi/components/${NODE_NAME}/stdout 2> /var/mqsi/components/${NODE_NAME}/stderr &
-                    disown
-                    sleep 5
-                else
-                    echo "Node ${NODE_NAME} already running."
-                fi
+                echo "Sleeping 10 seconds to allow node to fully start..."
+                sleep 10
+                '''
+            }
+        }
 
-                # Deploy BAR
-                echo "Deploying BAR ${BAR_FILE}..."
-                mqsideploy ${NODE_NAME} -e ${SERVER_NAME} -a ${BAR_FILE}
+        stage('Deploy BAR') {
+            steps {
+                sh '''#!/bin/bash
+                set -e
+
+                echo "Deploying ${BAR_FILE} to ${NODE_NAME}/${SERVER_NAME}..."
+                bash -lc ". ${ACE_PROFILE}; mqsideploy ${NODE_NAME} -e ${SERVER_NAME} -a ${BAR_FILE}"
 
                 echo "Deployment completed successfully!"
-                '
                 '''
             }
         }
     }
 }
+
 
 
