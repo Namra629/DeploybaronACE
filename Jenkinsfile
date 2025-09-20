@@ -54,9 +54,9 @@ echo "Loading ACE environment"
 
                     mqsistop testnode 
 
-                    echo "Sleeping for 5 seconds before starting broker..." 
+                    echo "Sleeping for 150 seconds before starting broker..." 
 
-                    sleep 5 
+                    sleep 150
                     mqsistart testnode
 
                 else 
