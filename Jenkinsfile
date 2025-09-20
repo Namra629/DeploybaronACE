@@ -17,7 +17,7 @@ pipeline {
             }
         }
 
-        stage('Setup and Deploy') {
+        stage('Start Node and Server') {
             steps {
                 sh '''#!/bin/bash
                 set -e
@@ -25,37 +25,27 @@ pipeline {
                 echo "Loading ACE environment"
                 . ${ACE_PROFILE}
 
-# Start node if not running
-if ! mqsilist | grep -q "${NODE_NAME}" | grep -qi "Running"; then
-    echo "Starting integration node ${NODE_NAME}..."
-    mqsistart ${NODE_NAME}
-
-    # Wait until node is fully running
-    while true; do
-        if mqsilist | grep -q "${NODE_NAME}" | grep -qi "Running"; then
-            echo "Node ${NODE_NAME} is now running."
-            break
-        else
-            echo "Waiting for node to start..."
-            sleep 5
-        fi
-    done
-else
-    echo "Node ${NODE_NAME} is already running."
-fi
-
-
-
-                # Ensure server exists
-                if ! mqsilist ${NODE_NAME} | grep -q "${SERVER_NAME}"; then
-                    echo "Creating integration server ${SERVER_NAME}..."
-                    mqsicreateexecutiongroup ${NODE_NAME} -e ${SERVER_NAME}
+                # Start the node if not running
+                if ! mqsilist | grep -q "${NODE_NAME}" | grep -qi "Running"; then
+                    echo "Starting integration node ${NODE_NAME}..."
+                    mqsistart ${NODE_NAME}
+                    echo "Waiting 5 seconds for node to be fully started..."
+                    sleep 5
                 else
-                    echo "Server ${SERVER_NAME} already exists"
+                    echo "Node ${NODE_NAME} is already running."
                 fi
 
-                # Optional sleep before deployment
-                sleep 5
+                # Start the server if not running
+                SERVER_STATUS=$(mqsilist ${NODE_NAME} | grep "${SERVER_NAME}" | awk '{print $3}' | head -n1)
+                if [ "$SERVER_STATUS" != "Running" ]; then
+                    echo "Starting server ${SERVER_NAME} on node ${NODE_NAME}..."
+                    mqsistartmsgflow ${NODE_NAME} -e ${SERVER_NAME}
+                    # Some ACE versions require starting the execution group explicitly
+                    echo "Waiting 5 seconds for server to be fully started..."
+                    sleep 5
+                else
+                    echo "Server ${SERVER_NAME} is already running."
+                fi
 
                 # Deploy BAR
                 echo "Deploying ${BAR_FILE} to ${NODE_NAME}/${SERVER_NAME}..."
@@ -67,3 +57,4 @@ fi
         }
     }
 }
+
