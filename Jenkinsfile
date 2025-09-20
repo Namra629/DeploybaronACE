@@ -27,7 +27,7 @@ pipeline {
 
                 # Start node
                 echo "Starting integration node ${NODE_NAME}"
-                mqsistart ${NODE_NAME}
+                mqsistart ${NODE_NAME} -i
                 echo "Waiting 5 seconds for node to fully start..."
                 sleep 5
 
