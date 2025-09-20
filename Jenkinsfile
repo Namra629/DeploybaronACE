@@ -92,7 +92,7 @@ fi
 
 echo "Deploying HelloWorld.bar" 
 
-mqsideploy 2ndnode -e 2ndserver -a HelloWorld.bar 
+mqsideploy testnode -e 2ndserver -a HelloWorld.bar 
 
 ''' 
 
