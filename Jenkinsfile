@@ -57,14 +57,11 @@ echo "Loading ACE environment"
                     echo "Sleeping for 5 seconds before starting broker..." 
 
                     sleep 5 
+                    mqsistart testnode
 
                 else 
 
-                    echo "Broker testnode doesnot exist" 
-
-                    echo "Restarting broker to be safe..." 
-
-                    mqsistart testnode 
+                    echo "Broker testnode doesnot exist"  
 
      
 
