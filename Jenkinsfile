@@ -25,34 +25,26 @@ pipeline {
                 echo "Loading ACE environment"
                 . ${ACE_PROFILE}
 
-                # Ensure node exists
-                if ! mqsilist | grep -q "${NODE_NAME}"; then
-                    echo "Creating integration node ${NODE_NAME}..."
-                    mqsicreatebroker ${NODE_NAME}
-                else
-                    echo "Node ${NODE_NAME} already exists"
-                fi
+# Start node if not running
+if ! mqsilist | grep -q "${NODE_NAME}" | grep -qi "Running"; then
+    echo "Starting integration node ${NODE_NAME}..."
+    mqsistart ${NODE_NAME}
 
-                # Start node if not running
-                NODE_STATUS=$(mqsilist | grep "${NODE_NAME}" | awk '{print $2}' | head -n1)
-                if [ "$NODE_STATUS" != "Running" ]; then
-                    echo "Starting integration node ${NODE_NAME}..."
-                    mqsistart ${NODE_NAME}
+    # Wait until node is fully running
+    while true; do
+        if mqsilist | grep -q "${NODE_NAME}" | grep -qi "Running"; then
+            echo "Node ${NODE_NAME} is now running."
+            break
+        else
+            echo "Waiting for node to start..."
+            sleep 5
+        fi
+    done
+else
+    echo "Node ${NODE_NAME} is already running."
+fi
 
-                    # Wait until node is running
-                    while true; do
-                        NODE_STATUS=$(mqsilist | grep "${NODE_NAME}" | awk '{print $2}' | head -n1)
-                        if [ "$NODE_STATUS" == "Running" ]; then
-                            echo "Node ${NODE_NAME} is now running."
-                            break
-                        else
-                            echo "Waiting for node to start..."
-                            sleep 5
-                        fi
-                    done
-                else
-                    echo "Node ${NODE_NAME} is already running."
-                fi
+
 
                 # Ensure server exists
                 if ! mqsilist ${NODE_NAME} | grep -q "${SERVER_NAME}"; then
