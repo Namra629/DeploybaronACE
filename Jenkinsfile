@@ -15,7 +15,7 @@ pipeline {
         stage('Deploy Bar to ACE') {
             steps {
                 sh '''#!/bin/bash
-                set -e
+                
                 echo "Loading ACE environment"
                 . ${ACE_PROFILE}
  
