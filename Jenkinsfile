@@ -2,9 +2,7 @@ pipeline {
     agent any
     environment {
         ACE_PROFILE = '/home/Namra/ace-12.0.12.16/server/bin/mqsiprofile'
-        NODE_NAME   = 'testnode'
-        SERVER_NAME = 'helloworld'
-        BAR_FILE    = 'HelloWorld.bar'
+        
     }
     stages {
         stage('Git Checkout') {
@@ -22,12 +20,12 @@ pipeline {
                 echo "Loading ACE environment"
                 . ${ACE_PROFILE}
 
-                echo "Starting integration node ${NODE_NAME}..."
-                mqsistart ${NODE_NAME}
+                echo "Starting integration node "
+                mqsistart testnode
                 sleep 5
 
-                echo "Deploying bar ${BAR_FILE} to ${NODE_NAME}/${SERVER_NAME}..."
-                mqsideploy ${NODE_NAME} -e ${SERVER_NAME} -a ${BAR_FILE}
+                echo "Deploying bar"
+                mqsideploy testnode -e helloworld-a HelloWorld.bar
 
                 echo "Deployment completed successfully!"
                 '''
