@@ -1,38 +1,38 @@
-pipeline{
+pipeline {
     agent any
-    environment{
+    environment {
         ACE_PROFILE = '/home/Namra/ace-12.0.12.16/server/bin/mqsiprofile'
+        NODE_NAME   = 'testnode'
+        SERVER_NAME = 'helloworld'
+        BAR_FILE    = 'HelloWorld.bar'
     }
-    stages{
-        stage('Git Checkout'){
-            steps{
+    stages {
+        stage('Git Checkout') {
+            steps {
                 git branch: 'main',
                     url: 'https://github.com/Namra629/DeploybaronACE',
                     credentialsId: 'git_cred'
             }
-
         }
-        stage('Deploy Bar to ACE'){
-           steps{
-            set -e
+
+        stage('Deploy Bar to ACE') {
+            steps {
+                sh '''#!/bin/bash
+                set -e
                 echo "Loading ACE environment"
-                . ${ACE_PROFILE}  
+                . ${ACE_PROFILE}
 
                 echo "Starting integration node ${NODE_NAME}..."
-                mqsistart testnode
+                mqsistart ${NODE_NAME}
                 sleep 5
 
-               
-
-                echo "Deploying bar"
-                mqsideploy testnode -e helloworld -a HelloWorld.bar
+                echo "Deploying bar ${BAR_FILE} to ${NODE_NAME}/${SERVER_NAME}..."
+                mqsideploy ${NODE_NAME} -e ${SERVER_NAME} -a ${BAR_FILE}
 
                 echo "Deployment completed successfully!"
-            
-         
-
-              
-           }
+                '''
+            }
         }
     }
 }
+
