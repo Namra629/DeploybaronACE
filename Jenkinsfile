@@ -1,52 +1,34 @@
-pipeline {
-    agent any
+piepline{
+    agnet any
+      environment { 
 
-    environment {
-        ACE_PROFILE = '/home/Namra/ace-12.0.12.16/server/bin/mqsiprofile'
-        NODE_NAME   = 'testnode'
-        SERVER_NAME = '2ndserver'
-        BAR_FILE    = 'HelloWorld.bar'
-    }
+        ACE_PROFILE = '/home/Namra/ace-12.0.12.16/server/bin/mqsiprofile' 
 
-    stages {
-        stage('Setup and Deploy') {
-            steps {
-                sh '''#!/bin/bash
-                set -e
+    } 
 
-                echo "Loading ACE environment"
-                source ${ACE_PROFILE}
+  
 
-                # Create node if not exists
-                if ! mqsilist | grep -q "${NODE_NAME}"; then
-                    echo "Creating integration node ${NODE_NAME}"
-                    mqsicreatebroker ${NODE_NAME}
-                else
-                    echo "Integration node ${NODE_NAME} already exists"
-                fi
+    stages { 
 
-                # Start node
-                echo "Starting integration node ${NODE_NAME}"
-                mqsistart ${NODE_NAME} -i
-                echo "Waiting 5 seconds for node to fully start..."
-                sleep 5
+        stage('Git Checkout') { 
 
-                # Create server if not exists
-                if ! mqsilist ${NODE_NAME} | grep -q "${SERVER_NAME}"; then
-                    echo "Creating integration server ${SERVER_NAME}"
-                    mqsicreateexecutiongroup ${NODE_NAME} -e ${SERVER_NAME}
-                else
-                    echo "Integration server ${SERVER_NAME} already exists"
-                fi
+            steps { 
 
-                # Deploy BAR file
-                echo "Deploying ${BAR_FILE} to ${NODE_NAME}/${SERVER_NAME}"
-                mqsideploy ${NODE_NAME} -e ${SERVER_NAME} -a ${BAR_FILE}
+                git branch: 'main', 
 
-                echo " Deployment complete"
-                mqsilist
-                '''
-            }
+                    url: 'https://github.com/Namra629/DeploybaronACE', 
+
+                    credentialsId: 'git_cred' 
+
+            } 
+
+        } 
+        stage('setup and deploy'){
+            sh ''' #!/bin/bash
+            mqsistart testnode
+            sleep 5
+            mqsideploy testnode -e helloworld -a HelloWorld.bar
+            '''
         }
-    }
+        }
 }
