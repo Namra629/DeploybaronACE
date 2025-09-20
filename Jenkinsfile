@@ -23,7 +23,7 @@ pipeline {
                 echo "Starting integration node "
                 nohup mqsistart testnode > /var/mqsi/components/testnode/stdout 2> /var/mqsi/components/testnode/stderr &
                 
-
+                disown
                 echo "Deploying bar"
                 mqsideploy testnode -e helloworld -a HelloWorld.bar
 
