@@ -58,7 +58,7 @@ echo "Loading ACE environment"
 
                     sleep 150
                     mqsistart testnode
-
+                    sleep 150
                 else 
 
                     echo "Broker testnode doesnot exist"  
