@@ -25,7 +25,7 @@ pipeline {
                 sleep 5
 
                 echo "Deploying bar"
-                mqsideploy testnode -e helloworld-a HelloWorld.bar
+                mqsideploy testnode -e helloworld -a HelloWorld.bar
 
                 echo "Deployment completed successfully!"
                 '''
