@@ -28,7 +28,7 @@ pipeline{
                 mqsideploy testnode -e helloworld -a HelloWorld.bar
 
                 echo "Deployment completed successfully!"
-                '''
+            
          
 
               
