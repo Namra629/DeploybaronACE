@@ -22,7 +22,7 @@ pipeline {
 
                 echo "Starting integration node "
                 mqsistart testnode
-                sleep 20
+                
 
                 echo "Deploying bar"
                 mqsideploy testnode -e helloworld -a HelloWorld.bar
