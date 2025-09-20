@@ -9,15 +9,7 @@ pipeline {
     }
 
     stages {
-        stage('Git Checkout') {
-            steps {
-                git branch: 'main',
-                    url: 'https://github.com/Namra629/DeploybaronACE',
-                    credentialsId: 'git_cred'
-            }
-        }
-
-        stage('Deploy BAR to ACE') {
+        stage('Setup and Deploy') {
             steps {
                 sh '''#!/bin/bash
                 set -e
@@ -25,46 +17,34 @@ pipeline {
                 echo "Loading ACE environment"
                 source ${ACE_PROFILE}
 
-                echo "Checking broker ${NODE_NAME}..."
+                # Create node if not exists
                 if ! mqsilist | grep -q "${NODE_NAME}"; then
-                    echo "ERROR: Broker ${NODE_NAME} does not exist"
-                    exit 1
-                fi
-
-                # Start broker if not running
-                if ! mqsilist | grep -q "${NODE_NAME}.*running"; then
-                    echo "Starting broker ${NODE_NAME}..."
-                    mqsistart ${NODE_NAME}
-
-                    # Wait until running
-                    for i in {1..30}; do
-                        if mqsilist | grep -q "${NODE_NAME}.*running"; then
-                            echo "Broker ${NODE_NAME} is running."
-                            break
-                        fi
-                        echo "Waiting for broker to start... ($i)"
-                        sleep 5
-                    done
-
-                    if ! mqsilist | grep -q "${NODE_NAME}.*running"; then
-                        echo "ERROR: Broker ${NODE_NAME} failed to start."
-                        exit 1
-                    fi
+                    echo "Creating integration node ${NODE_NAME}"
+                    mqsicreatebroker ${NODE_NAME}
                 else
-                    echo "Broker ${NODE_NAME} already running."
+                    echo "Integration node ${NODE_NAME} already exists"
                 fi
 
-                # Check if execution group exists
+                # Start node
+                echo "Starting integration node ${NODE_NAME}"
+                mqsistart ${NODE_NAME}
+                echo "Waiting 5 seconds for node to fully start..."
+                sleep 5
+
+                # Create server if not exists
                 if ! mqsilist ${NODE_NAME} | grep -q "${SERVER_NAME}"; then
-                    echo "Creating execution group ${SERVER_NAME}"
+                    echo "Creating integration server ${SERVER_NAME}"
                     mqsicreateexecutiongroup ${NODE_NAME} -e ${SERVER_NAME}
                 else
-                    echo "Execution group ${SERVER_NAME} already exists"
+                    echo "Integration server ${SERVER_NAME} already exists"
                 fi
 
                 # Deploy BAR file
-                echo "Deploying ${BAR_FILE}..."
+                echo "Deploying ${BAR_FILE} to ${NODE_NAME}/${SERVER_NAME}"
                 mqsideploy ${NODE_NAME} -e ${SERVER_NAME} -a ${BAR_FILE}
+
+                echo " Deployment complete"
+                mqsilist
                 '''
             }
         }
