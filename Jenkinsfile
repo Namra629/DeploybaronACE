@@ -16,7 +16,7 @@ pipeline{
            steps{
             set -e
                 echo "Loading ACE environment"
-                . ${ACE_PROFILE}  # source in current shell context
+                . ${ACE_PROFILE}  
 
                 echo "Starting integration node ${NODE_NAME}..."
                 mqsistart testnode
