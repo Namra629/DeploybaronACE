@@ -31,10 +31,6 @@ pipeline {
                 echo "Sleeping 10 seconds to allow node to start..."
                 sleep 10
 
-                echo "Starting server ${SERVER_NAME} on node ${NODE_NAME}..."
-                mqsistartmsgflow ${NODE_NAME} -e ${SERVER_NAME}
-                echo "Sleeping 5 seconds to allow server to initialize..."
-                sleep 5
 
                 echo "Deploying ${BAR_FILE} to ${NODE_NAME}/${SERVER_NAME}..."
                 mqsideploy ${NODE_NAME} -e ${SERVER_NAME} -a ${BAR_FILE}
